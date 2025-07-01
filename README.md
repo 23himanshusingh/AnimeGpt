@@ -2,7 +2,9 @@
 
 - React + Vite , Tailwind setup
 - Header
-- Login Form
+- Routing
+- Login + Sign up Form
+- form validation
 
 # Features
 
