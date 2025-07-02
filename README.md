@@ -5,6 +5,9 @@
 - Routing
 - Login + Sign up Form
 - form validation
+- firebase setup
+- deploying app to production
+- create signup user account
 
 # Features
 

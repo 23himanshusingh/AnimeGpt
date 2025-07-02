@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { auth } from '../utils/firebase';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 
 const validateEmail = (email) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -22,6 +24,7 @@ const Login = () => {
     password: '',
   });
   const [errors, setErrors] = useState({});
+  const [firebaseError, setFirebaseError] = useState('');
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -43,10 +46,23 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setFirebaseError('');
     if (!validateForm()) return;
-    alert(isSignUp ? 'Sign Up Successful!' : 'Login Successful!');
+    try {
+      if (isSignUp) {
+        const res = await createUserWithEmailAndPassword(auth, form.email, form.password);
+        const user = res.user;
+        console.log('User created:', user);
+      } else {
+        const res = await signInWithEmailAndPassword(auth, form.email, form.password);
+        const user = res.user;
+        console.log('Logged In:', user);
+      }
+    } catch (error) {
+      setFirebaseError(error.message);
+    }
   };
 
   return (
@@ -101,6 +117,7 @@ const Login = () => {
             {isSignUp ? 'Sign Up' : 'Login'}
           </button>
         </form>
+        {firebaseError && <div className="text-red-400 text-center mt-2 text-sm">{firebaseError}</div>}
         <div className="text-center mt-4">
           <button
             type="button"
