@@ -8,7 +8,8 @@
 - firebase setup
 - deploying app to production
 - create signup user account
-
+- react store with user slice created
+- auth state change updates the redux and firebase
 # Features
 
 -Login/Sign Up

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { auth } from '../utils/firebase';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { useDispatch } from 'react-redux';
+import { addUser } from '../utils/userSlice';
 
 const validateEmail = (email) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -25,6 +27,8 @@ const Login = () => {
   });
   const [errors, setErrors] = useState({});
   const [firebaseError, setFirebaseError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -50,18 +54,32 @@ const Login = () => {
     e.preventDefault();
     setFirebaseError('');
     if (!validateForm()) return;
+    setLoading(true);
     try {
       if (isSignUp) {
         const res = await createUserWithEmailAndPassword(auth, form.email, form.password);
-        const user = res.user;
-        console.log('User created:', user);
+        // Set displayName and default photoURL
+        const defaultPhoto = `https://ui-avatars.com/api/?name=${encodeURIComponent(form.username)}&background=orange&color=fff`;
+        await updateProfile(res.user, {
+          displayName: form.username,
+          photoURL: defaultPhoto,
+        });
+        await res.user.reload();
+        // Dispatch updated user to Redux
+        dispatch(addUser({
+          uid: res.user.uid,
+          email: res.user.email,
+          displayName: res.user.displayName,
+          photoURL: res.user.photoURL,
+        }));
       } else {
-        const res = await signInWithEmailAndPassword(auth, form.email, form.password);
-        const user = res.user;
-        console.log('Logged In:', user);
+        await signInWithEmailAndPassword(auth, form.email, form.password);
+        // Redux and navigation handled by Layout.jsx
       }
     } catch (error) {
       setFirebaseError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -113,8 +131,9 @@ const Login = () => {
           <button
             type="submit"
             className="bg-orange-400 hover:bg-orange-500 text-white font-bold py-3 rounded-lg shadow-md transition-all duration-200 mt-2"
+            disabled={loading}
           >
-            {isSignUp ? 'Sign Up' : 'Login'}
+            {loading ? (isSignUp ? 'Signing Up...' : 'Logging In...') : (isSignUp ? 'Sign Up' : 'Login')}
           </button>
         </form>
         {firebaseError && <div className="text-red-400 text-center mt-2 text-sm">{firebaseError}</div>}
