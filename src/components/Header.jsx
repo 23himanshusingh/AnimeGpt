@@ -3,24 +3,26 @@ import { useSelector, useDispatch } from 'react-redux';
 import { removeUser } from '../utils/userSlice';
 import { auth } from '../utils/firebase';
 import { signOut } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const user = useSelector((state) => state.user.user);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const handleLogout = async () => {
     await signOut(auth);
     dispatch(removeUser());
-    navigate('/');
   };
 
   return (
-    <header className="flex items-center bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 px-8 py-4 shadow-lg border-b-2 border-orange-400 z-10 relative">
+    <header className="sticky top-0 flex items-center bg-gradient-to-r from-black via-gray-900 to-black px-8 py-4 shadow-lg border-b-2 border-orange-400 z-50">
       <div className="flex items-center gap-2 flex-1">
         <img src="https://m.media-amazon.com/images/I/41o03HyOYlL.png" alt="logo" className="h-12 w-12 rounded-full shadow-md border-2 border-orange-400 bg-white" />
         <span className="text-3xl font-extrabold text-orange-400 tracking-wide drop-shadow-lg">AnimeGPT</span>
+        <nav className="ml-8 flex gap-6 text-white font-semibold">
+          <a href="/browse" className="hover:text-orange-400">Home</a>
+          <a href="#" className="hover:text-orange-400">Series</a>
+          <a href="#" className="hover:text-orange-400">Popular</a>
+        </nav>
       </div>
       {user && (
         <div className="flex items-center gap-4">

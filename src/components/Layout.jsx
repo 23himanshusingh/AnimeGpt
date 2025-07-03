@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from './Header';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { onAuthStateChanged, updateProfile } from 'firebase/auth';
 import { auth } from '../utils/firebase';
 import { useDispatch } from 'react-redux';
@@ -9,6 +9,8 @@ import { addUser, removeUser } from '../utils/userSlice';
 const Layout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -36,19 +38,28 @@ const Layout = () => {
           displayName: displayName,
           photoURL: photoURL,
         }));
-        navigate('/browse');
+        if (location.pathname !== '/browse') {
+          navigate('/browse');
+        }
       } else {
         dispatch(removeUser());
-        navigate('/');
+        if (location.pathname !== '/') {
+          navigate('/');
+        }
       }
+      setLoading(false);
     });
     return () => unsubscribe();
-  }, [dispatch, navigate]);
+  }, [dispatch, navigate, location]);
 
   return (
     <>
       <Header />
-      <Outlet />
+      {loading ? (
+        <div className="flex justify-center items-center min-h-[40vh] text-orange-400 text-xl font-bold">Loading...</div>
+      ) : (
+        <Outlet />
+      )}
     </>
   );
 };
