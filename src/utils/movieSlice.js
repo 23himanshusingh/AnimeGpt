@@ -1,7 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  popularAnime: [],
+  topAiringAnime: [],
+  nowPlayingAnime: [],
+  topRatedAnime: [],
+  topAnimeMovies: [],
   animeTrailer: null,
 };
 
@@ -9,8 +12,17 @@ const animeSlice = createSlice({
   name: 'anime',
   initialState,
   reducers: {
-    addPopularAnime: (state, action) => {
-      state.popularAnime = action.payload;
+    addTopAiringAnime: (state, action) => {
+      state.topAiringAnime = action.payload;
+    },
+    addNowPlayingAnime: (state, action) => {
+      state.nowPlayingAnime = action.payload;
+    },
+    addTopRatedAnime: (state, action) => {
+      state.topRatedAnime = action.payload;
+    },
+    addTopAnimeMovies: (state, action) => {
+      state.topAnimeMovies = action.payload;
     },
     setAnimeTrailer: (state, action) => {
       state.animeTrailer = action.payload;
@@ -18,5 +30,11 @@ const animeSlice = createSlice({
   },
 });
 
-export const { addPopularAnime, setAnimeTrailer } = animeSlice.actions;
+export const { 
+  addTopAiringAnime, 
+  addNowPlayingAnime, 
+  addTopRatedAnime, 
+  addTopAnimeMovies, 
+  setAnimeTrailer 
+} = animeSlice.actions;
 export default animeSlice.reducer; 

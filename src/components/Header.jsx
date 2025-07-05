@@ -18,11 +18,6 @@ const Header = () => {
       <div className="flex items-center gap-2 flex-1">
         <img src="https://m.media-amazon.com/images/I/41o03HyOYlL.png" alt="logo" className="h-12 w-12 rounded-full shadow-md border-2 border-orange-400 bg-white" />
         <span className="text-3xl font-extrabold text-orange-400 tracking-wide drop-shadow-lg">AnimeGPT</span>
-        <nav className="ml-8 flex gap-6 text-white font-semibold">
-          <a href="/browse" className="hover:text-orange-400">Home</a>
-          <a href="#" className="hover:text-orange-400">Series</a>
-          <a href="#" className="hover:text-orange-400">Popular</a>
-        </nav>
       </div>
       {user && (
         <div className="flex items-center gap-4">
