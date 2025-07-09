@@ -38,7 +38,8 @@ const Layout = () => {
           displayName: displayName,
           photoURL: photoURL,
         }));
-        if (location.pathname !== '/browse') {
+        // Only redirect to browse if on login page
+        if (location.pathname === '/') {
           navigate('/browse');
         }
       } else {

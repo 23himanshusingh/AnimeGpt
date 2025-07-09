@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 import AnimeList from './AnimeList';
 
-const SecondaryContainer = () => {
+const SecondaryContainer = ({ onAnimeClick }) => {
   const topAiringAnime = useSelector((store) => store.anime?.topAiringAnime);
   const nowPlayingAnime = useSelector((store) => store.anime?.nowPlayingAnime);
   const topRatedAnime = useSelector((store) => store.anime?.topRatedAnime);
@@ -12,22 +12,22 @@ const SecondaryContainer = () => {
       <div className="w-full">
         {/* Top Airing Anime */}
         {topAiringAnime && topAiringAnime.length > 0 && (
-          <AnimeList title="Top Airing" anime={topAiringAnime} />
+          <AnimeList title="Top Airing" anime={topAiringAnime} onAnimeClick={onAnimeClick} />
         )}
         
         {/* Now Playing Anime */}
         {nowPlayingAnime && nowPlayingAnime.length > 0 && (
-          <AnimeList title="Now Playing" anime={nowPlayingAnime} />
+          <AnimeList title="Now Playing" anime={nowPlayingAnime} onAnimeClick={onAnimeClick} />
         )}
         
         {/* Top Rated Anime */}
         {topRatedAnime && topRatedAnime.length > 0 && (
-          <AnimeList title="Top Rated" anime={topRatedAnime} />
+          <AnimeList title="Top Rated" anime={topRatedAnime} onAnimeClick={onAnimeClick} />
         )}
         
         {/* Top Anime Movies */}
         {topAnimeMovies && topAnimeMovies.length > 0 && (
-          <AnimeList title="Top Anime Movies" anime={topAnimeMovies} />
+          <AnimeList title="Top Anime Movies" anime={topAnimeMovies} onAnimeClick={onAnimeClick} />
         )}
       </div>
     </div>

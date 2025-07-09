@@ -7,7 +7,7 @@ import {
   addTopAnimeMovies 
 } from '../utils/movieSlice';
 import { JIKAN_BASE_URL, API_ENDPOINTS, API_DELAY, CACHE_KEYS } from '../utils/constants';
-import { cacheUtils } from '../utils/cacheUtils';
+import { getCachedData, setCachedData } from '../utils/cacheUtils';
 
 const useAnimeData = () => {
   const dispatch = useDispatch();
@@ -15,7 +15,7 @@ const useAnimeData = () => {
   const fetchAnimeData = useCallback(async (endpoint, action, cacheKey) => {
     try {
       // Check cache first
-      const cachedData = cacheUtils.get(cacheKey);
+      const cachedData = getCachedData(cacheKey);
       if (cachedData) {
         dispatch(action(cachedData));
         return;
@@ -32,7 +32,7 @@ const useAnimeData = () => {
       
       if (data.data && Array.isArray(data.data)) {
         // Cache the data
-        cacheUtils.set(cacheKey, data.data);
+        setCachedData(cacheKey, data.data);
         dispatch(action(data.data));
       }
     } catch (error) {

@@ -1,14 +1,23 @@
 import React from 'react';
 import { PLACEHOLDER_IMAGES } from '../utils/constants';
 
-const AnimeCard = ({ anime }) => {
+const AnimeCard = ({ anime, onClick }) => {
   if (!anime) return null;
 
   const { images } = anime;
   const posterPath = images?.jpg?.image_url || images?.webp?.image_url;
 
+  const handleClick = () => {
+    if (onClick) {
+      onClick(anime);
+    }
+  };
+
   return (
-    <div className="relative group cursor-pointer transition-all duration-300 ease-in-out hover:scale-105 hover:z-10">
+    <div 
+      className="relative group cursor-pointer transition-all duration-300 ease-in-out hover:scale-105 hover:z-10"
+      onClick={handleClick}
+    >
       {/* Anime Poster */}
       <div className="relative overflow-hidden rounded-md">
         <img

@@ -19,6 +19,7 @@ export const CACHE_KEYS = {
   TOP_RATED: 'top_rated_anime',
   TOP_MOVIES: 'top_movies_anime',
   ANIME_TRAILER: (id) => `anime_trailer_${id}`,
+  ANIME_DETAILS: (id) => `anime_details_${id}`,
 };
 
 // YouTube Player Settings

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import AnimeCard from './AnimeCard';
 import { CSS_CLASSES } from '../utils/constants';
 
-const AnimeList = ({ title, anime }) => {
+const AnimeList = ({ title, anime, onAnimeClick }) => {
   const [uniqueAnime, setUniqueAnime] = useState([]);
 
   useEffect(() => {
@@ -36,7 +36,10 @@ const AnimeList = ({ title, anime }) => {
           {uniqueAnime.map((animeItem, index) => {
             return (
               <div key={`${animeItem.mal_id}-${index}`} className="flex-shrink-0 w-40 md:w-48">
-                <AnimeCard anime={animeItem} />
+                <AnimeCard 
+                  anime={animeItem} 
+                  onClick={onAnimeClick}
+                />
               </div>
             );
           })}
