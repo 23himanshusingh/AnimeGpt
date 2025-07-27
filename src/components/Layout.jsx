@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import Header from './Header';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { onAuthStateChanged, updateProfile } from 'firebase/auth';
-import { auth } from '../utils/firebase';
 import { useDispatch } from 'react-redux';
 import { addUser, removeUser } from '../utils/userSlice';
+import { jwtDecode } from 'jwt-decode';
 
 const Layout = () => {
   const dispatch = useDispatch();
@@ -13,44 +12,35 @@ const Layout = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        let displayName = user.displayName;
-        let photoURL = user.photoURL;
-        // If displayName or photoURL is missing, try to reload the user
-        if (!displayName || !photoURL) {
-          try {
-            await user.reload();
-            displayName = user.displayName;
-            photoURL = user.photoURL;
-          } catch {/* ignore reload error */}
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        // Optionally, check token expiration
+        if (decoded.exp && Date.now() >= decoded.exp * 1000) {
+          localStorage.removeItem('token');
+          dispatch(removeUser());
+          if (location.pathname !== '/') navigate('/');
+          setLoading(false);
+          return;
         }
-        // If photoURL is still missing, set a default one
-        if (!photoURL) {
-          photoURL = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName || user.email)}&background=orange&color=fff`;
-          try {
-            await updateProfile(user, { photoURL });
-          } catch {/* ignore updateProfile error */}
-        }
-        dispatch(addUser({
-          uid: user.uid,
-          email: user.email,
-          displayName: displayName,
-          photoURL: photoURL,
-        }));
-        // Only redirect to browse if on login page
+        dispatch(addUser({ email: decoded.email, displayName: decoded.displayName || decoded.email }));
         if (location.pathname === '/') {
           navigate('/browse');
         }
-      } else {
+      } catch {
+        // If decoding fails, remove token and log out
+        localStorage.removeItem('token');
         dispatch(removeUser());
-        if (location.pathname !== '/') {
-          navigate('/');
-        }
+        if (location.pathname !== '/') navigate('/');
       }
-      setLoading(false);
-    });
-    return () => unsubscribe();
+    } else {
+      dispatch(removeUser());
+      if (location.pathname !== '/') {
+        navigate('/');
+      }
+    }
+    setLoading(false);
   }, [dispatch, navigate, location]);
 
   return (

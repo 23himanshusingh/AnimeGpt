@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import useAnimeDetails from '../hooks/useAnimeDetails';
 import useWatchlist from '../hooks/useWatchlist';
@@ -8,14 +8,27 @@ import { clearTrailer, clearAnimeDetails } from '../utils/movieSlice';
 import { FaPlay, FaPlus, FaCheck, FaStar, FaTimes, FaHeart, FaShare, FaEye, FaCalendar, FaClock, FaUsers, FaExternalLinkAlt, FaHome } from 'react-icons/fa';
 import { useNavigate, useParams } from 'react-router-dom';
 
+const STATUS_OPTIONS = [
+  'Watching',
+  'Completed',
+  'On-Hold',
+  'Dropped',
+  'Plan to Watch',
+];
+
 const AnimeDetails = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { selectedAnime, recommendations, detailsLoading, trailerLoading } = useSelector(store => store.anime);
   const { fetchAnimeDetails } = useAnimeDetails();
-  const { addAnimeToWatchlist, removeAnimeFromWatchlist, isInWatchlist, watchlistError } = useWatchlist();
+  const { addAnimeToWatchlist, isInWatchlist, watchlist, fetchWatchlist } = useWatchlist();
   const { id: animeId } = useParams();
   
+  const [showWatchlistModal, setShowWatchlistModal] = useState(false);
+  const [status, setStatus] = useState('Plan to Watch');
+  const [userRating, setUserRating] = useState(0);
+  const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
+
   // Fetch trailer for the selected anime
   useAnimeTrailer(animeId);
 
@@ -28,6 +41,19 @@ const AnimeDetails = () => {
       dispatch(clearTrailer());
     };
   }, [animeId, fetchAnimeDetails, dispatch]);
+
+  useEffect(() => {
+    if (isInWatchlist(selectedAnime?.mal_id)) {
+      const anime = watchlist.find(a => a.mal_id === selectedAnime.mal_id);
+      setStatus(anime?.status || 'Plan to Watch');
+      setUserRating(anime?.userRating || 0);
+      setModalMode('edit');
+    } else {
+      setStatus('Plan to Watch');
+      setUserRating(0);
+      setModalMode('add');
+    }
+  }, [selectedAnime, isInWatchlist, watchlist]);
 
   if (detailsLoading || trailerLoading) {
     return (
@@ -42,12 +68,31 @@ const AnimeDetails = () => {
 
   if (!selectedAnime) return null;
 
-  const handleWatchlistToggle = () => {
-    if (isInWatchlist(selectedAnime.mal_id)) {
-      removeAnimeFromWatchlist(selectedAnime.mal_id);
+  const handleWatchlistClick = () => {
+    setShowWatchlistModal(true);
+  };
+
+  const handleModalSave = async () => {
+    const animeData = {
+      ...selectedAnime,
+      status,
+      userRating,
+    };
+    if (modalMode === 'add') {
+      await addAnimeToWatchlist(animeData);
     } else {
-      addAnimeToWatchlist(selectedAnime);
+      // Update status/rating for existing
+      await fetch(`/api/watchlist/${selectedAnime.mal_id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({ status, userRating }),
+      });
+      fetchWatchlist();
     }
+    setShowWatchlistModal(false);
   };
 
   const handleYouTubeTrailer = () => {
@@ -94,14 +139,10 @@ const AnimeDetails = () => {
           {/* Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
           
-          {/* Content Overlay */}
+          {/* Content Overlay (remove title from here) */}
           <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
             <div className="max-w-6xl mx-auto">
-              {/* Title and Basic Info */}
-              <h1 className="text-3xl md:text-6xl font-bold text-white mb-4 leading-tight">
-                {selectedAnime.title}
-              </h1>
-              
+              {/* Quick Stats and Action Buttons only */}
               {/* Quick Stats */}
               <div className="flex flex-wrap items-center gap-4 mb-6 text-white/90">
                 {selectedAnime.score && (
@@ -133,7 +174,6 @@ const AnimeDetails = () => {
                   </div>
                 )}
               </div>
-
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-3 mb-2">
                 {selectedAnime.trailer?.url && (
@@ -147,7 +187,7 @@ const AnimeDetails = () => {
                   </button>
                 )}
                 <button
-                  onClick={handleWatchlistToggle}
+                  onClick={handleWatchlistClick}
                   className={`px-6 py-3 rounded-lg flex items-center gap-2 transition-all duration-200 font-semibold ${
                     isInWatchlist(selectedAnime.mal_id)
                       ? 'bg-green-600 text-white hover:bg-green-700'
@@ -155,7 +195,7 @@ const AnimeDetails = () => {
                   }`}
                 >
                   {isInWatchlist(selectedAnime.mal_id) ? <FaCheck /> : <FaPlus />}
-                  {isInWatchlist(selectedAnime.mal_id) ? 'In Watchlist' : 'Add to Watchlist'}
+                  {isInWatchlist(selectedAnime.mal_id) ? 'Edit Watchlist' : 'Add to Watchlist'}
                 </button>
                 <button
                   onClick={handleShare}
@@ -166,9 +206,50 @@ const AnimeDetails = () => {
                 </button>
               </div>
               {/* Watchlist Error Message */}
-              {watchlistError && (
-                <div className="text-red-400 bg-black/60 px-4 py-2 rounded mb-2 font-semibold">
-                  {watchlistError}
+              {/* Watchlist Modal */}
+              {showWatchlistModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+                  <div className="bg-gray-900 rounded-xl p-8 w-full max-w-md border border-orange-400 relative">
+                    <button
+                      className="absolute top-2 right-2 text-gray-400 hover:text-orange-400"
+                      onClick={() => setShowWatchlistModal(false)}
+                    >
+                      <FaTimes size={20} />
+                    </button>
+                    <h3 className="text-xl font-bold text-orange-400 mb-4 text-center">
+                      {modalMode === 'add' ? 'Add to Watchlist' : 'Edit Watchlist Entry'}
+                    </h3>
+                    <div className="mb-4">
+                      <label className="block text-gray-300 mb-2">Status</label>
+                      <select
+                        className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:border-orange-400 focus:outline-none"
+                        value={status}
+                        onChange={e => setStatus(e.target.value)}
+                      >
+                        {STATUS_OPTIONS.map(opt => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="mb-4">
+                      <label className="block text-gray-300 mb-2">Your Rating</label>
+                      <input
+                        type="number"
+                        min={0}
+                        max={10}
+                        value={userRating}
+                        onChange={e => setUserRating(Number(e.target.value))}
+                        className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:border-orange-400 focus:outline-none"
+                      />
+                      <span className="text-gray-400 text-xs">0 = Unrated, 1-10 = Your score</span>
+                    </div>
+                    <button
+                      onClick={handleModalSave}
+                      className="w-full bg-orange-400 hover:bg-orange-500 text-white font-bold py-3 rounded-lg shadow-md transition-all duration-200 mt-2"
+                    >
+                      Save
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -178,6 +259,18 @@ const AnimeDetails = () => {
         {/* Content Section */}
         <div className="bg-gradient-to-b from-black to-gray-900">
           <div className="max-w-6xl mx-auto p-6 md:p-12">
+            {/* Move the title here, above the grid */}
+            <h1
+              className="text-2xl md:text-4xl font-bold text-white mb-8 leading-tight px-4 py-2 bg-black/60 rounded-lg shadow-lg backdrop-blur-sm"
+              style={{
+                textShadow: '0 2px 8px rgba(0,0,0,0.7)',
+                maxWidth: '90vw',
+                display: 'inline-block',
+                wordBreak: 'break-word',
+              }}
+            >
+              {selectedAnime.title}
+            </h1>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Main Content */}
               <div className="lg:col-span-2">
@@ -267,7 +360,7 @@ const AnimeDetails = () => {
                           onClick={() => {
                             dispatch(clearAnimeDetails());
                             dispatch(clearTrailer());
-                            fetchAnimeDetails(anime.mal_id);
+                            navigate(`/anime/${anime.mal_id}`);
                           }}
                         >
                           <img

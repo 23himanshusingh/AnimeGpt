@@ -1,8 +1,6 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux';
 import { removeUser } from '../utils/userSlice';
-import { auth } from '../utils/firebase';
-import { signOut } from 'firebase/auth';
 import { FaSearch, FaBookmark, FaHome } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -12,9 +10,10 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogout = async () => {
-    await signOut(auth);
+  const handleLogout = () => {
+    localStorage.removeItem('token');
     dispatch(removeUser());
+    navigate('/');
   };
 
   const handleSearchClick = () => {

@@ -10,15 +10,24 @@ const getYouTubeVideoId = (embedUrl) => {
   return null;
 };
 
+const AnimePlaceholderSVG = () => (
+  <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-60">
+    <rect width="180" height="180" rx="32" fill="#23272F" />
+    <ellipse cx="90" cy="110" rx="50" ry="18" fill="#353945" />
+    <rect x="45" y="40" width="90" height="60" rx="12" fill="#353945" />
+    <rect x="60" y="55" width="60" height="30" rx="6" fill="#23272F" />
+    <circle cx="90" cy="70" r="10" fill="#FF9900" />
+    <rect x="80" y="120" width="20" height="8" rx="4" fill="#FF9900" />
+    <text x="90" y="170" textAnchor="middle" fill="#888" fontSize="14" fontFamily="sans-serif">No Preview</text>
+  </svg>
+);
+
 const VideoBackground = ({ animeId }) => {
   const trailerData = useSelector((store) => store.anime.trailerData);
   const currentTrailerId = useSelector((store) => store.anime.currentTrailerId);
   const trailerLoading = useSelector((store) => store.anime.trailerLoading);
 
   const videoId = getYouTubeVideoId(trailerData?.embed_url);
-
-  // Debug logging
-  console.log({ trailerData, currentTrailerId, animeId, videoId });
 
   // Accept string/number comparison for IDs
   const idsMatch = String(currentTrailerId) === String(animeId);
@@ -38,13 +47,26 @@ const VideoBackground = ({ animeId }) => {
 
   // Only show the trailer if the data is for the current anime and we have a videoId
   if (!videoId || !idsMatch) {
-    return (
-      <div className="absolute top-0 left-0 w-full h-full -z-10 overflow-hidden flex items-center justify-center">
-        <div className="w-full h-full bg-gradient-to-b from-gray-900 to-black" />
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-        <div className="absolute inset-0 flex items-center justify-center z-10">
-          <span className="text-white text-lg bg-black/60 px-6 py-3 rounded-lg">No trailer available for this anime.</span>
+    // Try to show an image if available
+    const imageUrl = trailerData?.images?.jpg?.image_url || trailerData?.images?.webp?.image_url;
+    if (imageUrl) {
+      return (
+        <div className="absolute top-0 left-0 w-full h-full -z-10 overflow-hidden">
+          <img
+            src={imageUrl}
+            alt="Anime Poster"
+            className="w-full h-full object-cover"
+            style={{ objectPosition: 'center' }}
+          />
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
         </div>
+      );
+    }
+    // Fallback to SVG placeholder
+    return (
+      <div className="absolute top-0 left-0 w-full h-full -z-10 overflow-hidden flex items-center justify-center bg-gradient-to-b from-gray-900 to-black">
+        <AnimePlaceholderSVG />
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
       </div>
     );
   }

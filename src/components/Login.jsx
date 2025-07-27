@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { auth } from '../utils/firebase';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { useDispatch } from 'react-redux';
 import { addUser } from '../utils/userSlice';
 
@@ -26,7 +24,7 @@ const Login = () => {
     password: '',
   });
   const [errors, setErrors] = useState({});
-  const [firebaseError, setFirebaseError] = useState('');
+  const [apiError, setApiError] = useState('');
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
 
@@ -52,32 +50,32 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setFirebaseError('');
+    setApiError('');
     if (!validateForm()) return;
     setLoading(true);
     try {
+      let response;
       if (isSignUp) {
-        const res = await createUserWithEmailAndPassword(auth, form.email, form.password);
-        // Set displayName and default photoURL
-        const defaultPhoto = `https://ui-avatars.com/api/?name=${encodeURIComponent(form.username)}&background=orange&color=fff`;
-        await updateProfile(res.user, {
-          displayName: form.username,
-          photoURL: defaultPhoto,
+        response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: form.email, password: form.password })
         });
-        await res.user.reload();
-        // Dispatch updated user to Redux
-        dispatch(addUser({
-          uid: res.user.uid,
-          email: res.user.email,
-          displayName: res.user.displayName,
-          photoURL: res.user.photoURL,
-        }));
       } else {
-        await signInWithEmailAndPassword(auth, form.email, form.password);
-        // Redux and navigation handled by Layout.jsx
+        response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: form.email, password: form.password })
+        });
       }
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Authentication failed');
+      localStorage.setItem('token', data.token);
+      // Optionally decode JWT for user info, or fetch user info from backend
+      dispatch(addUser({ email: form.email, displayName: form.username || form.email }));
+      // Optionally redirect here
     } catch (error) {
-      setFirebaseError(error.message);
+      setApiError(error.message);
     } finally {
       setLoading(false);
     }
@@ -136,7 +134,7 @@ const Login = () => {
             {loading ? (isSignUp ? 'Signing Up...' : 'Logging In...') : (isSignUp ? 'Sign Up' : 'Login')}
           </button>
         </form>
-        {firebaseError && <div className="text-red-400 text-center mt-2 text-sm">{firebaseError}</div>}
+        {apiError && <div className="text-red-400 text-center mt-2 text-sm">{apiError}</div>}
         <div className="text-center mt-4">
           <button
             type="button"

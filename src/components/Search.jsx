@@ -84,14 +84,10 @@ const Search = () => {
                       key={anime.mal_id}
                       className="group relative bg-gray-800 rounded-lg overflow-hidden hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-2xl"
                       onClick={() => handleAnimeSelect(anime)}
+                      style={{ aspectRatio: '3/4', minHeight: 0 }}
                     >
-                      <div className="relative">
-                        <img
-                          src={anime.images.jpg.image_url}
-                          alt={anime.title}
-                          className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300"
-                        />
-                        
+                      <div className="relative w-full h-64" style={{ aspectRatio: '3/4' }}>
+                        <SearchAnimeCardImage anime={anime} />
                         {/* Overlay */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
                           <div className="p-4 w-full">
@@ -101,7 +97,6 @@ const Search = () => {
                             </div>
                           </div>
                         </div>
-
                         {/* Score Badge */}
                         {anime.score && (
                           <div className="absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
@@ -110,13 +105,11 @@ const Search = () => {
                           </div>
                         )}
                       </div>
-
                       {/* Info */}
                       <div className="p-4">
                         <h3 className="text-white font-semibold text-sm line-clamp-2 mb-2 group-hover:text-orange-400 transition-colors">
                           {anime.title}
                         </h3>
-                        
                         <div className="flex items-center justify-between text-xs text-gray-400 mb-2">
                           <div className="flex items-center gap-1">
                             <FaEye />
@@ -129,7 +122,6 @@ const Search = () => {
                             </div>
                           )}
                         </div>
-
                         {/* Genres */}
                         {anime.genres && anime.genres.length > 0 && (
                           <div className="flex flex-wrap gap-1">
@@ -179,6 +171,34 @@ const Search = () => {
           <Watchlist />
         )}
       </div>
+    </div>
+  );
+};
+
+const SearchAnimeCardImage = ({ anime }) => {
+  const [imgError, setImgError] = React.useState(false);
+  const posterPath = anime.images?.jpg?.image_url || anime.images?.webp?.image_url;
+  if (!imgError && posterPath) {
+    return (
+      <img
+        src={posterPath}
+        alt={anime.title}
+        className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110"
+        style={{ aspectRatio: '3/4', minHeight: 0 }}
+        onError={() => setImgError(true)}
+      />
+    );
+  }
+  // SVG placeholder
+  return (
+    <div className="w-full h-full flex items-center justify-center bg-gray-800 rounded-lg">
+      <svg width="60" height="80" viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-40">
+        <rect width="60" height="80" rx="10" fill="#23272F" />
+        <ellipse cx="30" cy="60" rx="18" ry="6" fill="#353945" />
+        <rect x="15" y="20" width="30" height="24" rx="5" fill="#353945" />
+        <rect x="20" y="30" width="20" height="10" rx="2" fill="#23272F" />
+        <circle cx="30" cy="35" r="4" fill="#FF9900" />
+      </svg>
     </div>
   );
 };
