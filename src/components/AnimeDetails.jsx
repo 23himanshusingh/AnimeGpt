@@ -73,11 +73,21 @@ const AnimeDetails = () => {
   };
 
   const handleModalSave = async () => {
+    // Extract the necessary data for watchlist storage
     const animeData = {
-      ...selectedAnime,
+      mal_id: selectedAnime.mal_id,
+      title: selectedAnime.title,
+      image: selectedAnime.images?.jpg?.image_url || selectedAnime.images?.webp?.image_url || selectedAnime.image || null,
+      url: selectedAnime.url,
+      type: selectedAnime.type,
+      year: selectedAnime.year,
       status,
       userRating,
     };
+    
+    // Debug logging (remove in production)
+    console.log('Adding anime to watchlist:', animeData);
+    
     if (modalMode === 'add') {
       await addAnimeToWatchlist(animeData);
     } else {

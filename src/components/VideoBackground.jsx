@@ -26,6 +26,8 @@ const VideoBackground = ({ animeId }) => {
   const trailerData = useSelector((store) => store.anime.trailerData);
   const currentTrailerId = useSelector((store) => store.anime.currentTrailerId);
   const trailerLoading = useSelector((store) => store.anime.trailerLoading);
+  const selectedAnime = useSelector((store) => store.anime.selectedAnime);
+  const topRatedAnime = useSelector((store) => store.anime.topRatedAnime);
 
   const videoId = getYouTubeVideoId(trailerData?.embed_url);
 
@@ -45,9 +47,51 @@ const VideoBackground = ({ animeId }) => {
     );
   }
 
+  // Get background image from anime data
+  const getBackgroundImage = () => {
+    // First try to get from selected anime (for detailed views)
+    if (selectedAnime && selectedAnime.mal_id === animeId) {
+      const backgroundImage = selectedAnime.images?.jpg?.large_image_url || 
+                             selectedAnime.images?.webp?.large_image_url ||
+                             selectedAnime.images?.jpg?.image_url || 
+                             selectedAnime.images?.webp?.image_url;
+      return backgroundImage;
+    }
+    
+    // Then try to get from top rated anime (for main container)
+    if (topRatedAnime && topRatedAnime.length > 0) {
+      const mainAnime = topRatedAnime.find(anime => anime.mal_id === animeId) || topRatedAnime[0];
+      if (mainAnime) {
+        const backgroundImage = mainAnime.images?.jpg?.large_image_url || 
+                               mainAnime.images?.webp?.large_image_url ||
+                               mainAnime.images?.jpg?.image_url || 
+                               mainAnime.images?.webp?.image_url;
+        return backgroundImage;
+      }
+    }
+    
+    return null;
+  };
+
   // Only show the trailer if the data is for the current anime and we have a videoId
   if (!videoId || !idsMatch) {
-    // Try to show an image if available
+    // Try to show background image if available
+    const backgroundImage = getBackgroundImage();
+    if (backgroundImage) {
+      return (
+        <div className="absolute top-0 left-0 w-full h-full -z-10 overflow-hidden">
+          <img
+            src={backgroundImage}
+            alt="Anime Background"
+            className="w-full h-full object-cover"
+            style={{ objectPosition: 'center' }}
+          />
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+        </div>
+      );
+    }
+    
+    // Try to show an image from trailer data if available
     const imageUrl = trailerData?.images?.jpg?.image_url || trailerData?.images?.webp?.image_url;
     if (imageUrl) {
       return (
@@ -62,6 +106,7 @@ const VideoBackground = ({ animeId }) => {
         </div>
       );
     }
+    
     // Fallback to SVG placeholder
     return (
       <div className="absolute top-0 left-0 w-full h-full -z-10 overflow-hidden flex items-center justify-center bg-gradient-to-b from-gray-900 to-black">

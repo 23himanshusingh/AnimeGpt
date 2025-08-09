@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { addUser } from '../utils/userSlice';
 
 const validateEmail = (email) => {
@@ -27,6 +28,7 @@ const Login = () => {
   const [apiError, setApiError] = useState('');
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -73,7 +75,8 @@ const Login = () => {
       localStorage.setItem('token', data.token);
       // Optionally decode JWT for user info, or fetch user info from backend
       dispatch(addUser({ email: form.email, displayName: form.username || form.email }));
-      // Optionally redirect here
+      // Redirect to browse page after successful authentication
+      navigate('/browse');
     } catch (error) {
       setApiError(error.message);
     } finally {

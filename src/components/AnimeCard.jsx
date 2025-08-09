@@ -18,8 +18,16 @@ const AnimeCard = ({ anime, onClick }) => {
 
   if (!anime) return null;
 
-  const { images } = anime;
-  const posterPath = images?.jpg?.image_url || images?.webp?.image_url;
+  // Handle multiple data structures: regular anime (with images object) and watchlist anime (with image field)
+  let posterPath = null;
+  
+  if (anime.images) {
+    // Regular anime data structure
+    posterPath = anime.images?.jpg?.image_url || anime.images?.webp?.image_url;
+  } else if (anime.image) {
+    // Watchlist data structure
+    posterPath = anime.image;
+  }
 
   const handleClick = () => {
     if (onClick) {
@@ -39,7 +47,7 @@ const AnimeCard = ({ anime, onClick }) => {
           <img
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
             src={posterPath}
-            alt="anime"
+            alt={anime.title || "anime"}
             onError={() => setImgError(true)}
             style={{ aspectRatio: '3/4', minHeight: 0 }}
           />
