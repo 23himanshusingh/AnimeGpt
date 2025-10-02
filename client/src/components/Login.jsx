@@ -9,8 +9,8 @@ const validateEmail = (email) => {
 };
 
 const validatePassword = (password) => {
-  // At least 6 characters, at least one letter and one number
-  return /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/.test(password);
+  // At least 8 characters, with lowercase, uppercase, number, and symbol
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(password);
 };
 
 const validateUsername = (username) => {
@@ -45,7 +45,7 @@ const Login = () => {
       newErrors.email = 'Please enter a valid email address.';
     }
     if (!validatePassword(form.password)) {
-      newErrors.password = 'Password must be at least 6 characters and contain at least one letter and one number.';
+      newErrors.password = 'Password must be at least 8 characters and include upper, lower, number and symbol.';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

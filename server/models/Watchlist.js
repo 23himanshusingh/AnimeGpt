@@ -16,7 +16,7 @@ const animeSchema = new mongoose.Schema({
     type: Number,
     min: 0, // 0 for unrated
     max: 10,
-    default: 0
+    default: null
   },
   addedAt: {
     type: Date,
