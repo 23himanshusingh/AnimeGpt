@@ -9,10 +9,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Placeholder route
-app.get('/', (req, res) => {
-  res.send('AnimeGPT Backend Running');
-});
 
 const watchlistRoutes = require('./routes/watchlist');
 app.use('/api/watchlist', watchlistRoutes);
