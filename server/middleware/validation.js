@@ -5,8 +5,8 @@ const { body, validationResult } = require('express-validator');
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    // Return the first error message for a cleaner response
-    return res.status(400).json({ message: errors.array()[0].msg });
+    // Return the first error message for a cleaner response, using { error } key
+    return res.status(400).json({ error: errors.array()[0].msg });
   }
   next();
 };
