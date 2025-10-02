@@ -3,6 +3,7 @@ import useWatchlist from '../hooks/useWatchlist';
 import AnimeCard from './AnimeCard';
 import { FaHeart, FaTrash, FaPlay, FaHome, FaEdit, FaStar, FaEye, FaCalendar } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { BACKEND_URL } from '../utils/constants';
 
 const STATUS_OPTIONS = [
   'Watching',
@@ -61,7 +62,7 @@ const Watchlist = () => {
 
   const handleEditSave = async (anime) => {
     const { status, userRating } = editState[anime.mal_id];
-    await fetch(`/api/watchlist/${anime.mal_id}`, {
+    await fetch(`${BACKEND_URL}/api/watchlist/${anime.mal_id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

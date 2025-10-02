@@ -1,5 +1,7 @@
 export const JIKAN_BASE_URL = 'https://api.jikan.moe/v4';
 
+export const BACKEND_URL = 'https://animegpt.onrender.com';
+
 // API Endpoints
 export const API_ENDPOINTS = {
   TOP_AIRING: 'top/anime?filter=airing',

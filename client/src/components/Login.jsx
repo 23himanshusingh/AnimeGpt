@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { addUser } from '../utils/userSlice';
+import { BACKEND_URL } from '../utils/constants';
 
 const validateEmail = (email) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -58,13 +59,13 @@ const Login = () => {
     try {
       let response;
       if (isSignUp) {
-        response = await fetch('/api/auth/register', {
+        response = await fetch(`${BACKEND_URL}/api/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: form.email, password: form.password })
         });
       } else {
-        response = await fetch('/api/auth/login', {
+        response = await fetch(`${BACKEND_URL}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: form.email, password: form.password })

@@ -7,6 +7,7 @@ import VideoBackground from './VideoBackground';
 import { clearTrailer, clearAnimeDetails } from '../utils/movieSlice';
 import { FaPlay, FaPlus, FaCheck, FaStar, FaTimes, FaHeart, FaShare, FaEye, FaCalendar, FaClock, FaUsers, FaExternalLinkAlt, FaHome } from 'react-icons/fa';
 import { useNavigate, useParams } from 'react-router-dom';
+import { BACKEND_URL } from '../utils/constants';
 
 const STATUS_OPTIONS = [
   'Watching',
@@ -92,7 +93,7 @@ const AnimeDetails = () => {
       await addAnimeToWatchlist(animeData);
     } else {
       // Update status/rating for existing
-      await fetch(`/api/watchlist/${selectedAnime.mal_id}`, {
+      await fetch(`${BACKEND_URL}/api/watchlist/${selectedAnime.mal_id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

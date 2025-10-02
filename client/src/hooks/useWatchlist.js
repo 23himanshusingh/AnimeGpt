@@ -2,8 +2,9 @@ import { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setWatchlist, addToWatchlist, removeFromWatchlist, setWatchlistLoading } from '../utils/movieSlice';
 import { setWatchlistError } from '../utils/movieSlice';
+import { BACKEND_URL } from '../utils/constants';
 
-const API_URL = '/api/watchlist';
+const API_URL = `${BACKEND_URL}/api/watchlist`;
 
 const useWatchlist = () => {
   const dispatch = useDispatch();
